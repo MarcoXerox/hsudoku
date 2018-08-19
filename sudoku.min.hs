@@ -2,13 +2,14 @@ import Control.Monad (msum, (>=>))
 import Data.List (delete, sort, group)
 import Data.Either (isRight)
 import Data.Foldable (toList)
-import Data.Sequence hiding (zipWith, filter, sort)
+import Data.Sequence hiding (zipWith, filter, splitAt, sort)
 mcompose = foldr (>=>) return
+emptyPuzzle :: Seq (Either Int [Int])
 emptyPuzzle = Data.Sequence.replicate (9 * 9) (Right [1..9])
 newPuzzle xs = mcompose (zipWith adjustCell [0..] $ concat xs) emptyPuzzle
 puzzleToList = go . toList
     where go [] = []
-          go xs = let (first, rest) = Prelude.splitAt 9 xs in (either id (const 0) <$> first) : go rest
+          go xs = let (first, rest) = splitAt 9 xs in (either id (const 0) <$> first) : go rest
 sudoku puzzle = maybe (Just puzzle) (msum . map sudoku . makePuzzles puzzle) (findIndexL isRight puzzle)
 makePuzzles puzzle k = let Right es = puzzle `index` k in [x | Just x <- [adjustCell k e puzzle | e <- es]]
 adjustCell _ 0 = Just
@@ -22,7 +23,6 @@ main = getContents >>= putStrLn . maybe "No solution found" (unlines . map (unwo
 adjacents' n = delete n . map head . group . sort $ pos
     where pos = let (y, x) = n `divMod` 9 in [x, x + 9 .. x + 9 * 8] ++ [9 * y .. 9 * y + 8] ++ [9 * (q + 3 * (y `div` 3)) + (p + 3 * (x `div` 3)) | p <- [0..2], q <- [0..2]]
 -}
-adjacents :: Int -> [Int]
 adjacents 0  = [1,2,3,4,5,6,7,8,9,10,11,18,19,20,27,36,45,54,63,72]
 adjacents 1  = [0,2,3,4,5,6,7,8,9,10,11,18,19,20,28,37,46,55,64,73]
 adjacents 2  = [0,1,3,4,5,6,7,8,9,10,11,18,19,20,29,38,47,56,65,74]
